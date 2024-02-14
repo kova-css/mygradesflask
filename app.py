@@ -20,4 +20,4 @@ def fetch_data():
         
         return response.text
 
-app.run(debug=True)
+app.run()
