@@ -1,5 +1,6 @@
 from flask import Flask, request
 import requests
+from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 
@@ -17,7 +18,12 @@ def fetch_data():
     elif response.status_code == 302:
         response = requests.post(url, data=data)
         response.encoding = 'utf-8'
-        
-        return response.text
+        soup = BeautifulSoup(response.text, 'html.parser')
+        materials = soup.find_all('th', {'class': 'rotate'})
+        data = []
+        for material in materials[1:]:
+            name = material.get('name')
+            data.append({'material': material.text.strip(), 'id': name[1:]})
+    return data
 
-app.run(debug=False)
+app.run()
