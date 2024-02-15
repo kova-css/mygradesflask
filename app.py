@@ -34,6 +34,15 @@ def fetch_data():
                 name = material.get('name')
                 data.append({'material': material.text.strip(), 'id': name[1:]})
         return Response(json.dumps(data, ensure_ascii=False), mimetype='application/json')
+    elif method == 'login':
+        if response.status_code == 200:
+            return 'wrongCred'
+        elif response.status_code == 302:
+            response = requests.post(url, data=data)
+            response.encoding = 'utf-8'
+            soup = BeautifulSoup(response.text, 'html.parser')
+            name = soup.find_all('span')
+            return name[5].text
     else:
         return 'Invalid method'
 
