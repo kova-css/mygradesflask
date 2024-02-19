@@ -1,7 +1,11 @@
+import os
 from flask import Flask, request, Response
 from bs4 import BeautifulSoup
 import requests
 import json
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import unpad
+from base64 import b64decode
 
 class CustomJSONEncoder(json.JSONEncoder):
     def __init__(self, *args, **kwargs):
@@ -17,6 +21,12 @@ def fetch_data():
     url = req_data.get('url')
     data = req_data.get('data')
     method = req_data.get('method')
+
+    key = os.getenv('cryptokey')
+    iv = b64decode(req_data.get('iv'))
+    cipher = AES.new(key, AES.MODE_CBC, iv=iv)
+    decrypted_data = unpad(cipher.decrypt(b64decode(data['txtPwd'])), AES.block_size).decode('utf-8')
+    data['txtPwd'] = decrypted_data
 
     response = requests.post(url, data=data, allow_redirects=False)
     response.encoding = 'utf-8'
