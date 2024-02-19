@@ -3,5 +3,4 @@ requests
 Gunicorn
 bs4
 Crypto
-os
 pycryptodome
