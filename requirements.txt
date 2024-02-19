@@ -2,3 +2,8 @@ Flask
 requests
 Gunicorn
 bs4
+base64
+json
+Crypto
+os
+pycryptodome
