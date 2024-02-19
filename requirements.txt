@@ -2,7 +2,6 @@ Flask
 requests
 Gunicorn
 bs4
-json
 Crypto
 os
 pycryptodome
