@@ -51,8 +51,18 @@ def fetch_data():
             response = requests.post(url, data=data)
             response.encoding = 'utf-8'
             soup = BeautifulSoup(response.text, 'html.parser')
-            name = soup.find_all('span')
-            return name[5].text
+            nameArr = soup.find_all('span')
+            name = nameArr[5].text
+            materialsSoup = soup.find_all('th', {'class': 'rotate'})
+            materialsArr = []
+            for material in materialsSoup[1:]:
+                tempName = material.get('name')
+                materialsArr.append({'material': material.text.strip(), 'id': tempName[1:]})
+            data = {
+                'name': name,
+                'materials': materialsArr
+            }
+            return Response(json.dumps(data, ensure_ascii=False), mimetype='application/json')
     else:
         return 'Invalid method'
 
