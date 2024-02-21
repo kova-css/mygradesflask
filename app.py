@@ -6,6 +6,7 @@ import json
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 from base64 import b64decode
+import re
 
 class CustomJSONEncoder(json.JSONEncoder):
     def __init__(self, *args, **kwargs):
@@ -44,6 +45,36 @@ def fetch_data():
                 name = material.get('name')
                 data.append({'material': material.text.strip(), 'id': name[1:]})
         return Response(json.dumps(data, ensure_ascii=False), mimetype='application/json')
+    elif method == 'grades':
+        if response.status_code == 200:
+            return 'fail'
+        elif response.status_code == 302:
+            response = requests.post(url, data=data)
+            response.encoding = 'utf-8'
+            matId = req_data.get('id')
+            soup = BeautifulSoup(response.text, 'html.parser')
+            grades = soup.find_all('td', {'name': ('n' + str(matId))})
+            data = []
+            for grade in grades:
+                grade = grade.text.strip()
+                data.append(grade)
+            data = re.findall(r'(\d+)\s+(\d+\.\d+)', data[1])
+        return Response(json.dumps(data, ensure_ascii=False), mimetype='application/json')
+    elif method == 'absences':
+        if response.status_code == 200:
+            return 'fail'
+        elif response.status_code == 302:
+            response = requests.post(url, data=data)
+            response.encoding = 'utf-8'
+            matId = req_data.get('id')
+            soup = BeautifulSoup(response.text, 'html.parser')
+            absences = soup.find_all('td', {'name': ('n' + str(matId))})
+            data = []
+            for absence in absences:
+                absence = absence.text.strip()
+                data.append(absence)
+            data = re.findall(r'\d+\.\d+', data[0])
+        return Response(json.dumps(data, ensure_ascii=False), mimetype='application/json')
     elif method == 'login':
         if response.status_code == 200:
             return 'wrongCred'
@@ -55,12 +86,34 @@ def fetch_data():
             name = nameArr[5].text
             materialsSoup = soup.find_all('th', {'class': 'rotate'})
             materialsArr = []
+            materialsInt = 0
             for material in materialsSoup[1:]:
                 tempName = material.get('name')
                 materialsArr.append({'material': material.text.strip(), 'id': tempName[1:]})
+                materialsInt += 1
+            absencesArr = []
+            for i in range(1, materialsInt + 1):
+                absences = soup.find_all('td', {'name': ('n' + str(i))})
+                data = []
+                for absence in absences:
+                    absence = absence.text.strip()
+                    data.append(absence)
+                data = re.findall(r'\d+\.\d+', data[0])
+                absencesArr.append(data)
+            gradesArr = []
+            for i in range(1, materialsInt + 1):
+                grades = soup.find_all('td', {'name': ('n' + str(i))})
+                data = []
+                for grade in grades:
+                    grade = grade.text.strip()
+                    data.append(grade)
+                data = re.findall(r'(\d+)\s+(\d+\.\d+)', data[1])
+                gradesArr.append(data)
             data = {
                 'name': name,
-                'materials': materialsArr
+                'materials': materialsArr,
+                'absences': absencesArr,
+                'grades': gradesArr,
             }
             return Response(json.dumps(data, ensure_ascii=False), mimetype='application/json')
     else:
