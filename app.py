@@ -22,7 +22,6 @@ def fetch_data():
     url = req_data.get('url')
     data = req_data.get('data')
     method = req_data.get('method')
-
     key = os.getenv('cryptokey').encode()
     iv = b64decode(req_data.get('iv'))
     cipher = AES.new(key, AES.MODE_CBC, iv=iv)
@@ -75,9 +74,9 @@ def fetch_data():
                 data.append(absence)
             data = re.findall(r'\d+\.\d+', data[0])
         return Response(json.dumps(data, ensure_ascii=False), mimetype='application/json')
-    elif method == 'login':
+    elif method == 'full':
         if response.status_code == 200:
-            return 'wrongCred'
+            return 'fail'
         elif response.status_code == 302:
             response = requests.post(url, data=data)
             response.encoding = 'utf-8'
@@ -109,8 +108,12 @@ def fetch_data():
                     data.append(grade)
                 data = re.findall(r'(\d+)\s+(\d+\.\d+)', data[1])
                 gradesArr.append(data)
+            premium = False
+            if (name == 'kovacs30844'):
+                premium = True
             data = {
                 'name': name,
+                'premium': premium,
                 'materials': materialsArr,
                 'absences': absencesArr,
                 'grades': gradesArr,
