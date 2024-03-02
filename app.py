@@ -109,7 +109,7 @@ def fetch_data():
                 data = re.findall(r'(\d+)\s+(\d+\.\d+)', data[1])
                 gradesArr.append(data)
             premium = False
-            if (name == 'kovacs30844'):
+            if (data['txtUser'] == 'kovacs30844'):
                 premium = True
             data = {
                 'name': name,
