@@ -27,6 +27,7 @@ def fetch_data():
     cipher = AES.new(key, AES.MODE_CBC, iv=iv)
     decrypted_data = unpad(cipher.decrypt(b64decode(data['txtPwd'])), AES.block_size).decode('utf-8')
     data['txtPwd'] = decrypted_data
+    username = data['txtUser']
 
     response = requests.post(url, data=data, allow_redirects=False)
     response.encoding = 'utf-8'
@@ -109,7 +110,7 @@ def fetch_data():
                 data = re.findall(r'(\d+)\s+(\d+\.\d+)', data[1])
                 gradesArr.append(data)
             premium = False
-            if (data['txtUser'] == 'kovacs30844'):
+            if (username == 'kovacs30844'):
                 premium = True
             data = {
                 'name': name,
