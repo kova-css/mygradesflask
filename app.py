@@ -32,50 +32,53 @@ def fetch_data():
     response = requests.post(url, data=data, allow_redirects=False)
     response.encoding = 'utf-8'
 
-    if method == 'materials':
-        if response.status_code == 200:
-            return 'fail'
-        elif response.status_code == 302:
-            response = requests.post(url, data=data)
-            response.encoding = 'utf-8'
-            soup = BeautifulSoup(response.text, 'html.parser')
-            materials = soup.find_all('th', {'class': 'rotate'})
-            data = []
-            for material in materials[1:]:
-                name = material.get('name')
-                data.append({'material': material.text.strip(), 'id': name[1:]})
-        return Response(json.dumps(data, ensure_ascii=False), mimetype='application/json')
-    elif method == 'grades':
-        if response.status_code == 200:
-            return 'fail'
-        elif response.status_code == 302:
-            response = requests.post(url, data=data)
-            response.encoding = 'utf-8'
-            matId = req_data.get('id')
-            soup = BeautifulSoup(response.text, 'html.parser')
-            grades = soup.find_all('td', {'name': ('n' + str(matId))})
-            data = []
-            for grade in grades:
-                grade = grade.text.strip()
-                data.append(grade)
-            data = re.findall(r'(\d+)\s+(\d+\.\d+)', data[1])
-        return Response(json.dumps(data, ensure_ascii=False), mimetype='application/json')
-    elif method == 'absences':
-        if response.status_code == 200:
-            return 'fail'
-        elif response.status_code == 302:
-            response = requests.post(url, data=data)
-            response.encoding = 'utf-8'
-            matId = req_data.get('id')
-            soup = BeautifulSoup(response.text, 'html.parser')
-            absences = soup.find_all('td', {'name': ('n' + str(matId))})
-            data = []
-            for absence in absences:
-                absence = absence.text.strip()
-                data.append(absence)
-            data = re.findall(r'\d+\.\d+', data[0])
-        return Response(json.dumps(data, ensure_ascii=False), mimetype='application/json')
-    elif method == 'full':
+
+    # ----------------- OUTDATED -----------------
+    # if method == 'materials':
+    #     if response.status_code == 200:
+    #         return 'fail'
+    #     elif response.status_code == 302:
+    #         response = requests.post(url, data=data)
+    #         response.encoding = 'utf-8'
+    #         soup = BeautifulSoup(response.text, 'html.parser')
+    #         materials = soup.find_all('th', {'class': 'rotate'})
+    #         data = []
+    #         for material in materials[1:]:
+    #             name = material.get('name')
+    #             data.append({'material': material.text.strip(), 'id': name[1:]})
+    #     return Response(json.dumps(data, ensure_ascii=False), mimetype='application/json')
+    # elif method == 'grades':
+    #     if response.status_code == 200:
+    #         return 'fail'
+    #     elif response.status_code == 302:
+    #         response = requests.post(url, data=data)
+    #         response.encoding = 'utf-8'
+    #         matId = req_data.get('id')
+    #         soup = BeautifulSoup(response.text, 'html.parser')
+    #         grades = soup.find_all('td', {'name': ('n' + str(matId))})
+    #         data = []
+    #         for grade in grades:
+    #             grade = grade.text.strip()
+    #             data.append(grade)
+    #         data = re.findall(r'(\d+)\s+(\d+\.\d+)', data[1])
+    #     return Response(json.dumps(data, ensure_ascii=False), mimetype='application/json')
+    # elif method == 'absences':
+    #     if response.status_code == 200:
+    #         return 'fail'
+    #     elif response.status_code == 302:
+    #         response = requests.post(url, data=data)
+    #         response.encoding = 'utf-8'
+    #         matId = req_data.get('id')
+    #         soup = BeautifulSoup(response.text, 'html.parser')
+    #         absences = soup.find_all('td', {'name': ('n' + str(matId))})
+    #         data = []
+    #         for absence in absences:
+    #             absence = absence.text.strip()
+    #             data.append(absence)
+    #         data = re.findall(r'\d+\.\d+', data[0])
+    #     return Response(json.dumps(data, ensure_ascii=False), mimetype='application/json')
+    # ----------------- OUTDATED -----------------
+    if method == 'full':
         if response.status_code == 200:
             return 'fail'
         elif response.status_code == 302:
@@ -91,15 +94,24 @@ def fetch_data():
                 tempName = material.get('name')
                 materialsArr.append({'material': material.text.strip(), 'id': tempName[1:]})
                 materialsInt += 1
+            
+            absencesSoup = soup.find_all('td', id=lambda x: x and x.startswith('n'))
             absencesArr = []
-            for i in range(1, materialsInt + 1):
-                absences = soup.find_all('td', {'name': ('n' + str(i))})
-                data = []
-                for absence in absences:
-                    absence = absence.text.strip()
-                    data.append(absence)
-                data = re.findall(r'\d+\.\d+', data[0])
-                absencesArr.append(data)
+            for absence in absencesSoup:
+                child_table = absence.find('table', class_='tbNoteAbs')
+                
+                if child_table:
+                    cabs_mot_tds = child_table.find_all('td', class_=['cAbsMot', 'cAbsNeMot'])
+                    
+                    text_bool_list = []
+                    for td in cabs_mot_tds:
+                        text = td.get_text(strip=True)
+                        is_cabs_mot = td.has_attr('class') and 'cAbsMot' in td['class']
+                        
+                        text_bool_list.append((text, is_cabs_mot))
+                    
+                    absencesArr.append(text_bool_list)
+           
             gradesArr = []
             for i in range(1, materialsInt + 1):
                 grades = soup.find_all('td', {'name': ('n' + str(i))})
@@ -110,8 +122,6 @@ def fetch_data():
                 data = re.findall(r'(\d+)\s+(\d+\.\d+)', data[1])
                 gradesArr.append(data)
             premium = False
-            if (username == 'kovacs30844'):
-                premium = True
             data = {
                 'name': name,
                 'premium': premium,
