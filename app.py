@@ -101,7 +101,7 @@ def fetch_data():
                 child_table = absence.find('table', class_='tbNoteAbs')
                 
                 if child_table:
-                    cabs_mot_tds = child_table.find_all('td', class_=['cAbsMot', 'cAbsNeMot'])
+                    cabs_mot_tds = child_table.find_all('td', class_=['cAbsMot', 'cAbsNoMot'])
                     
                     text_bool_list = []
                     for td in cabs_mot_tds:
