@@ -27,57 +27,10 @@ def fetch_data():
     cipher = AES.new(key, AES.MODE_CBC, iv=iv)
     decrypted_data = unpad(cipher.decrypt(b64decode(data['txtPwd'])), AES.block_size).decode('utf-8')
     data['txtPwd'] = decrypted_data
-    username = data['txtUser']
-
+    
     response = requests.post(url, data=data, allow_redirects=False)
     response.encoding = 'utf-8'
 
-
-    # ----------------- OUTDATED -----------------
-    # if method == 'materials':
-    #     if response.status_code == 200:
-    #         return 'fail'
-    #     elif response.status_code == 302:
-    #         response = requests.post(url, data=data)
-    #         response.encoding = 'utf-8'
-    #         soup = BeautifulSoup(response.text, 'html.parser')
-    #         materials = soup.find_all('th', {'class': 'rotate'})
-    #         data = []
-    #         for material in materials[1:]:
-    #             name = material.get('name')
-    #             data.append({'material': material.text.strip(), 'id': name[1:]})
-    #     return Response(json.dumps(data, ensure_ascii=False), mimetype='application/json')
-    # elif method == 'grades':
-    #     if response.status_code == 200:
-    #         return 'fail'
-    #     elif response.status_code == 302:
-    #         response = requests.post(url, data=data)
-    #         response.encoding = 'utf-8'
-    #         matId = req_data.get('id')
-    #         soup = BeautifulSoup(response.text, 'html.parser')
-    #         grades = soup.find_all('td', {'name': ('n' + str(matId))})
-    #         data = []
-    #         for grade in grades:
-    #             grade = grade.text.strip()
-    #             data.append(grade)
-    #         data = re.findall(r'(\d+)\s+(\d+\.\d+)', data[1])
-    #     return Response(json.dumps(data, ensure_ascii=False), mimetype='application/json')
-    # elif method == 'absences':
-    #     if response.status_code == 200:
-    #         return 'fail'
-    #     elif response.status_code == 302:
-    #         response = requests.post(url, data=data)
-    #         response.encoding = 'utf-8'
-    #         matId = req_data.get('id')
-    #         soup = BeautifulSoup(response.text, 'html.parser')
-    #         absences = soup.find_all('td', {'name': ('n' + str(matId))})
-    #         data = []
-    #         for absence in absences:
-    #             absence = absence.text.strip()
-    #             data.append(absence)
-    #         data = re.findall(r'\d+\.\d+', data[0])
-    #     return Response(json.dumps(data, ensure_ascii=False), mimetype='application/json')
-    # ----------------- OUTDATED -----------------
     if method == 'full':
         if response.status_code == 200:
             return 'fail'
@@ -86,6 +39,8 @@ def fetch_data():
             response.encoding = 'utf-8'
             soup = BeautifulSoup(response.text, 'html.parser')
             nameArr = soup.find_all('span')
+            if nameArr[0].text == "Toggle navigation":
+                return '2fa'
             name = nameArr[5].text
             materialsSoup = soup.find_all('th', {'class': 'rotate'})
             materialsArr = []
