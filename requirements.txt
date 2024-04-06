@@ -1,6 +1,1 @@
 Flask
-requests
-Gunicorn
-bs4
-Crypto
-pycryptodome
