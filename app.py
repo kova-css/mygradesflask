@@ -87,5 +87,5 @@ def fetch_data():
             return Response(json.dumps(data, ensure_ascii=False), mimetype='application/json')
     else:
         return 'Invalid method'
-
-app.run()
+port = int(os.environ.get("PORT", 5000))
+app.run(host='0.0.0.0', port=port)
