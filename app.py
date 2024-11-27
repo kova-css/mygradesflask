@@ -23,6 +23,7 @@ def fetch_data():
     url = req_data.get('url')
     data = req_data.get('data')
     method = req_data.get('method')
+    username = data['txtUser']
     key = os.getenv('cryptokey').encode()
     if method == 'full':
         iv = b64decode(req_data.get('iv'))
@@ -88,7 +89,7 @@ def fetch_data():
             }
             return Response(json.dumps(data, ensure_ascii=False), mimetype='application/json')
     elif method == 'premium':
-        return data['txtUser'] in premiumUsers
+        return username in premiumUsers
     else:
         return 'Invalid method'
 
