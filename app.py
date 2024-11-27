@@ -79,7 +79,7 @@ def fetch_data():
                     data.append(grade)
                 data = re.findall(r'(\d+)\s+(\d+\.\d+)', data[1])
                 gradesArr.append(data)
-            premium = data['txtUser'] in premiumUsers
+            premium = username in premiumUsers
             data = {
                 'name': name,
                 'premium': premium,
