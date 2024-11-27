@@ -89,7 +89,10 @@ def fetch_data():
             }
             return Response(json.dumps(data, ensure_ascii=False), mimetype='application/json')
     elif method == 'premium':
-        return username in premiumUsers
+            if username in premiumUsers:
+                return 'True'
+            else:
+                return 'False'
     else:
         return 'Invalid method'
 
