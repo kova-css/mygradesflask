@@ -18,6 +18,7 @@ app.json_encoder = CustomJSONEncoder
 
 @app.route('/', methods=['POST'])
 def fetch_data():
+    premiumUsers = ["kovacs30844"]
     req_data = request.get_json()
     url = req_data.get('url')
     data = req_data.get('data')
@@ -27,7 +28,7 @@ def fetch_data():
     cipher = AES.new(key, AES.MODE_CBC, iv=iv)
     decrypted_data = unpad(cipher.decrypt(b64decode(data['txtPwd'])), AES.block_size).decode('utf-8')
     data['txtPwd'] = decrypted_data
-    
+
     response = requests.post(url, data=data, allow_redirects=False)
     response.encoding = 'utf-8'
 
@@ -76,7 +77,7 @@ def fetch_data():
                     data.append(grade)
                 data = re.findall(r'(\d+)\s+(\d+\.\d+)', data[1])
                 gradesArr.append(data)
-            premium = False
+            premium = data['txtUser'] in premiumUsers
             data = {
                 'name': name,
                 'premium': premium,
@@ -85,7 +86,9 @@ def fetch_data():
                 'grades': gradesArr,
             }
             return Response(json.dumps(data, ensure_ascii=False), mimetype='application/json')
+    elif method == 'premium':
+        return data['txtUser'] in premiumUsers
     else:
         return 'Invalid method'
-port = int(os.environ.get("PORT", 5000))
-app.run(host='0.0.0.0', port=port)
+
+app.run()
