@@ -24,13 +24,14 @@ def fetch_data():
     data = req_data.get('data')
     method = req_data.get('method')
     key = os.getenv('cryptokey').encode()
-    iv = b64decode(req_data.get('iv'))
-    cipher = AES.new(key, AES.MODE_CBC, iv=iv)
-    decrypted_data = unpad(cipher.decrypt(b64decode(data['txtPwd'])), AES.block_size).decode('utf-8')
-    data['txtPwd'] = decrypted_data
+    if method == 'full':
+        iv = b64decode(req_data.get('iv'))
+        cipher = AES.new(key, AES.MODE_CBC, iv=iv)
+        decrypted_data = unpad(cipher.decrypt(b64decode(data['txtPwd'])), AES.block_size).decode('utf-8')
+        data['txtPwd'] = decrypted_data
 
-    response = requests.post(url, data=data, allow_redirects=False)
-    response.encoding = 'utf-8'
+        response = requests.post(url, data=data, allow_redirects=False)
+        response.encoding = 'utf-8'
 
     if method == 'full':
         if response.status_code == 200:
