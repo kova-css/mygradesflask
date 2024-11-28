@@ -18,7 +18,7 @@ app.json_encoder = CustomJSONEncoder
 
 @app.route('/', methods=['POST'])
 def fetch_data():
-    premiumUsers = ["kovacs30844"]
+    premiumUsers = ["kovacs30844", "kocsis2844"]
     req_data = request.get_json()
     url = req_data.get('url')
     data = req_data.get('data')
